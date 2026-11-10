@@ -18,7 +18,6 @@ from flask import Flask
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-
 ADMIN_ROLE_ID = int(os.getenv("ADMIN_ROLE_ID", "1569705058151440414"))
 MOD_ROLE_ID = int(os.getenv("MOD_ROLE_ID", "1569705058151440414"))
 LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID", "1569705952419127426"))
@@ -598,8 +597,15 @@ class KrishuXBot(commands.Bot):
             traceback.print_exc()
 
         try:
-            synced = await self.tree.sync()
-            print(f"✅ Synced {len(synced)} slash commands")
+            # =====================================================
+            # ⚠️ HNA 7ET L'ID DYAL SERVER DYALEK (4FLAG CHEATS) ⚠️
+            # =====================================================
+            YOUR_GUILD_ID = 1422055422864396389  # <-- Bdel had l'raqm
+            
+            guild = discord.Object(id=YOUR_GUILD_ID)
+            self.tree.copy_global_to(guild=guild)
+            synced = await self.tree.sync(guild=guild)
+            print(f"✅ Synced {len(synced)} slash commands to your server")
         except Exception as e:
             print(f"❌ Failed to sync commands: {e}")
 
