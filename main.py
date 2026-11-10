@@ -98,7 +98,7 @@ class AdminToolbox(commands.Cog):
             color=discord.Color.orange(),
             timestamp=datetime.now()
         )
-        embed.add_field(name="👮 Moderator", value=moderator.mention, inline=True)
+        embed.add_field(name="👮 Moderator", value=moderator.mention if hasattr(moderator, 'mention') else str(moderator), inline=True)
         if target:
             embed.add_field(name="🎯 Target", value=target.mention if isinstance(target, discord.Member) else str(target), inline=True)
         embed.add_field(name="📝 Reason", value=reason, inline=False)
@@ -375,6 +375,179 @@ class AdminToolbox(commands.Cog):
             await send_response(embed=embed)
         except Exception as e:
             await send_response(f"❌ Failed to set slowmode: {e}", ephemeral=True)
+
+    # ---------------------------------------------------------
+    # NEW MODERATION COMMANDS
+    # ---------------------------------------------------------
+    @app_commands.command(name="timeout", description="Timeout a member")
+    @app_commands.describe(member="The member to timeout", minutes="Duration in minutes (1-1440)", reason="Reason for timeout")
+    async def timeout_slash(self, interaction: discord.Interaction, member: discord.Member, minutes: int, reason: str = "No reason provided"):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        if minutes < 1 or minutes > 1440:
+            await interaction.response.send_message("❌ Minutes must be between 1 and 1440.", ephemeral=True)
+            return
+        try:
+            await member.timeout(timedelta(minutes=minutes), reason=reason)
+            embed = discord.Embed(title="⏱️ Member Timed Out", color=discord.Color.orange())
+            embed.add_field(name="👤 Member", value=member.mention, inline=True)
+            embed.add_field(name="⏳ Duration", value=f"{minutes} minutes", inline=True)
+            embed.add_field(name="📝 Reason", value=reason, inline=False)
+            await interaction.response.send_message(embed=embed)
+            await self.log_action(interaction.guild, "Timeout", interaction.user, member, reason, f"{minutes} mins")
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="ban", description="Ban a member")
+    @app_commands.describe(member="The member to ban", reason="Reason for ban", delete_days="Delete messages from X days (0-7)")
+    async def ban_slash(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided", delete_days: int = 0):
+        if not self.is_admin(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        try:
+            await member.ban(reason=reason, delete_message_days=delete_days)
+            embed = discord.Embed(title="🔨 Member Banned", color=discord.Color.red())
+            embed.add_field(name="👤 Member", value=str(member), inline=True)
+            embed.add_field(name="📝 Reason", value=reason, inline=False)
+            await interaction.response.send_message(embed=embed)
+            await self.log_action(interaction.guild, "Ban", interaction.user, str(member), reason)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="kick", description="Kick a member")
+    @app_commands.describe(member="The member to kick", reason="Reason for kick")
+    async def kick_slash(self, interaction: discord.Interaction, member: discord.Member, reason: str = "No reason provided"):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        try:
+            await member.kick(reason=reason)
+            embed = discord.Embed(title="👢 Member Kicked", color=discord.Color.orange())
+            embed.add_field(name="👤 Member", value=str(member), inline=True)
+            embed.add_field(name="📝 Reason", value=reason, inline=False)
+            await interaction.response.send_message(embed=embed)
+            await self.log_action(interaction.guild, "Kick", interaction.user, str(member), reason)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="clear", description="Clear messages from a channel")
+    @app_commands.describe(amount="Number of messages to clear (1-1000)", channel="Channel to clear")
+    async def clear_slash(self, interaction: discord.Interaction, amount: int, channel: discord.TextChannel = None):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        if channel is None:
+            channel = interaction.channel
+        if amount < 1 or amount > 1000:
+            await interaction.response.send_message("❌ Amount must be between 1 and 1000!", ephemeral=True)
+            return
+        try:
+            deleted = await channel.purge(limit=amount)
+            await interaction.response.send_message(f"✅ Cleared {len(deleted)} messages in {channel.mention}.", ephemeral=True)
+            await self.log_action(interaction.guild, "Clear", interaction.user, reason=f"Cleared {len(deleted)} messages", extra=f"Channel: {channel.mention}")
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="nuke", description="Nuke/Reset a channel")
+    @app_commands.describe(channel="The channel to nuke")
+    async def nuke_slash(self, interaction: discord.Interaction, channel: discord.TextChannel = None):
+        if not self.is_admin(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        if channel is None:
+            channel = interaction.channel
+        try:
+            new_channel = await channel.clone()
+            await channel.delete()
+            await new_channel.send("💥 **Channel has been nuked!**")
+            await self.log_action(interaction.guild, "Nuke", interaction.user, reason="Channel reset", extra=f"Channel: {channel.name}")
+            await interaction.response.send_message(f"✅ Channel {new_channel.mention} has been nuked.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="announce", description="Send an announcement")
+    @app_commands.describe(channel="Channel to send", title="Title", description="Description", color="Color name (red, blue...)", footer="Footer text", thumbnail="Thumbnail URL", image="Image URL")
+    async def announce_slash(self, interaction: discord.Interaction, channel: discord.TextChannel, title: str, description: str, color: str = "blue", footer: str = None, thumbnail: str = None, image: str = None):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        color_map = {"red": discord.Color.red(), "blue": discord.Color.blue(), "green": discord.Color.green(), "yellow": discord.Color.yellow(), "purple": discord.Color.purple(), "orange": discord.Color.orange()}
+        embed_color = color_map.get(color.lower(), discord.Color.blue())
+        embed = discord.Embed(title=title, description=description, color=embed_color, timestamp=datetime.now())
+        if footer: embed.set_footer(text=footer)
+        if thumbnail: embed.set_thumbnail(url=thumbnail)
+        if image: embed.set_image(url=image)
+        try:
+            await channel.send(embed=embed)
+            await interaction.response.send_message(f"✅ Announcement sent to {channel.mention}.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="poll", description="Create a poll")
+    @app_commands.describe(channel="Channel to send", question="Poll question", options="Options separated by |")
+    async def poll_slash(self, interaction: discord.Interaction, channel: discord.TextChannel, question: str, options: str):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        opts = [o.strip() for o in options.split("|") if o.strip()]
+        if len(opts) < 2 or len(opts) > 10:
+            await interaction.response.send_message("❌ You must provide between 2 and 10 options.", ephemeral=True)
+            return
+        reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+        embed = discord.Embed(title="📊 " + question, description="\n".join([f"{reactions[i]} {opt}" for i, opt in enumerate(opts)]), color=discord.Color.blue(), timestamp=datetime.now())
+        embed.set_footer(text=f"Poll by {interaction.user.name}")
+        try:
+            msg = await channel.send(embed=embed)
+            for i in range(len(opts)):
+                await msg.add_reaction(reactions[i])
+            await interaction.response.send_message(f"✅ Poll created in {channel.mention}.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
+
+    @app_commands.command(name="giveaway_start", description="Start a giveaway")
+    @app_commands.describe(channel="Channel to host", prize="Prize", duration="Duration in minutes", winners="Number of winners", requirement="Role requirement (optional)")
+    async def giveaway_start_slash(self, interaction: discord.Interaction, channel: discord.TextChannel, prize: str, duration: int, winners: int = 1, requirement: discord.Role = None):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        embed = discord.Embed(title="🎉 GIVEAWAY 🎉", description=f"**Prize:** {prize}\n**Winners:** {winners}\n**Ends in:** {duration} minutes", color=discord.Color.gold(), timestamp=datetime.now())
+        if requirement:
+            embed.add_field(name="Requirement", value=requirement.mention, inline=False)
+        embed.set_footer(text="React with 🎉 to enter!")
+        try:
+            msg = await channel.send(embed=embed)
+            await msg.add_reaction("🎉")
+            await interaction.response.send_message(f"✅ Giveaway started in {channel.mention}.", ephemeral=True)
+            await asyncio.sleep(duration * 60)
+            new_msg = await channel.fetch_message(msg.id)
+            users = [user async for user in new_msg.reactions[0].users() if not user.bot]
+            if requirement:
+                users = [u for u in users if requirement in u.roles]
+            if not users:
+                await channel.send("❌ No one entered the giveaway.")
+                return
+            winner = random.choice(users)
+            await channel.send(f"🎉 Congratulations {winner.mention}! You won **{prize}**!")
+        except Exception as e:
+            print(f"Giveaway error: {e}")
+
+    @app_commands.command(name="giveaway_end", description="End a giveaway early")
+    @app_commands.describe(message_id="The message ID of the giveaway")
+    async def giveaway_end_slash(self, interaction: discord.Interaction, message_id: str):
+        if not self.is_mod(interaction.user):
+            await interaction.response.send_message("❌ No permission!", ephemeral=True)
+            return
+        try:
+            msg = await interaction.channel.fetch_message(int(message_id))
+            users = [user async for user in msg.reactions[0].users() if not user.bot]
+            if not users:
+                await interaction.response.send_message("❌ No one entered the giveaway.", ephemeral=True)
+                return
+            winner = random.choice(users)
+            await interaction.response.send_message(f"🎉 Congratulations {winner.mention}! You won the giveaway!")
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Failed: {e}", ephemeral=True)
 
     # ---------------------------------------------------------
     # INFO COMMANDS
