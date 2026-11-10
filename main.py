@@ -631,7 +631,7 @@ class KrishuXBot(commands.Bot):
 
         activity = discord.Activity(
             type=discord.ActivityType.watching,
-            name=f"{server_count} servers | /helpadmin"
+            name="𝟒𝐅𝐋𝐀𝐆 𝐒𝐄𝐂𝐔𝐑𝐈𝐓𝐘 𝟐𝟒/𝟕"
         )
         await self.change_presence(activity=activity)
 
@@ -642,7 +642,7 @@ class KrishuXBot(commands.Bot):
                 server_count = len(self.guilds)
                 activity = discord.Activity(
                     type=discord.ActivityType.watching,
-                    name=f"{server_count} servers | /helpadmin"
+                    name="𝟒𝐅𝐋𝐀𝐆 𝐒𝐄𝐂𝐔𝐑𝐈𝐓𝐘 𝟐𝟒/𝟕"
                 )
                 await self.change_presence(activity=activity)
         except Exception as e:
