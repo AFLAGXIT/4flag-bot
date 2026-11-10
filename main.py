@@ -19,9 +19,9 @@ from flask import Flask
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 
-ADMIN_ROLE_ID = int(os.getenv("ADMIN_ROLE_ID", "1519522814011641918"))
-MOD_ROLE_ID = int(os.getenv("MOD_ROLE_ID", "151952815261544519"))
-LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID", "1527463383450910934"))
+ADMIN_ROLE_ID = int(os.getenv("ADMIN_ROLE_ID", "1569705058151440414"))
+MOD_ROLE_ID = int(os.getenv("MOD_ROLE_ID", "1569705058151440414"))
+LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID", "1569705952419127426"))
 DATA_FILE = "warns.json"
 
 # =========================================================
