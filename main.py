@@ -31,7 +31,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Bot is running online 24/7!"
+    return "4FLAG SECURITY is running online 24/7!"
 
 def run_flask():
     app.run(host="0.0.0.0", port=10000)
@@ -65,7 +65,7 @@ intents.members = True
 intents.guilds = True
 intents.reactions = True
 
-bot_name = "KRISHU X"
+bot_name = "4FLAG SECURITY"
 
 # =========================================================
 # ADMIN TOOLBOX COG
@@ -104,7 +104,7 @@ class AdminToolbox(commands.Cog):
         embed.add_field(name="📝 Reason", value=reason, inline=False)
         if extra:
             embed.add_field(name="ℹ️ Details", value=extra, inline=False)
-        embed.set_footer(text="KRISHU X - Logging System")
+        embed.set_footer(text="4FLAG SECURITY - Logging System")
 
         try:
             await channel.send(embed=embed)
@@ -157,7 +157,7 @@ class AdminToolbox(commands.Cog):
         embed.add_field(name="📝 Reason", value=reason, inline=False)
         embed.add_field(name="👮 Moderator", value=author.mention, inline=True)
         embed.add_field(name="📊 Total Warnings", value=str(self.warn_data["users"][user_id]["total"]), inline=True)
-        embed.set_footer(text="KRISHU X - Admin Toolbox")
+        embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
         await send_response(embed=embed)
         await self.log_action(guild, "Warn", author, member, reason, f"Warning #{warn_id}")
@@ -172,7 +172,7 @@ class AdminToolbox(commands.Cog):
             dm_embed.add_field(name="📝 Reason", value=reason, inline=False)
             dm_embed.add_field(name="👮 Moderator", value=author.name, inline=True)
             dm_embed.add_field(name="📊 Total Warnings", value=str(self.warn_data["users"][user_id]["total"]), inline=True)
-            dm_embed.set_footer(text="KRISHU X - Admin Toolbox")
+            dm_embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
             await member.send(embed=dm_embed)
         except Exception:
             pass
@@ -207,7 +207,7 @@ class AdminToolbox(commands.Cog):
         else:
             embed.add_field(name="📝 Warnings", value="No warnings for this user.", inline=False)
 
-        embed.set_footer(text="KRISHU X - Admin Toolbox")
+        embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
         await send_response(embed=embed)
 
     @app_commands.command(name="clearwarns", description="Clear all warnings of a member")
@@ -240,7 +240,7 @@ class AdminToolbox(commands.Cog):
                 timestamp=datetime.now()
             )
             embed.add_field(name="👮 Moderator", value=author.mention, inline=True)
-            embed.set_footer(text="KRISHU X - Admin Toolbox")
+            embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
             await send_response(embed=embed)
         else:
@@ -285,7 +285,7 @@ class AdminToolbox(commands.Cog):
             )
             embed.add_field(name="📝 Reason", value=reason, inline=False)
             embed.add_field(name="👮 Moderator", value=author.mention, inline=True)
-            embed.set_footer(text="KRISHU X - Admin Toolbox")
+            embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
             await send_response(embed=embed)
             await self.log_action(guild, "Lock", author, reason=reason, extra=f"Channel: {channel.mention}")
@@ -327,7 +327,7 @@ class AdminToolbox(commands.Cog):
             )
             embed.add_field(name="📝 Reason", value=reason, inline=False)
             embed.add_field(name="👮 Moderator", value=author.mention, inline=True)
-            embed.set_footer(text="KRISHU X - Admin Toolbox")
+            embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
             await send_response(embed=embed)
             await self.log_action(guild, "Unlock", author, reason=reason, extra=f"Channel: {channel.mention}")
@@ -370,7 +370,7 @@ class AdminToolbox(commands.Cog):
                 timestamp=datetime.now()
             )
             embed.add_field(name="👮 Moderator", value=author.mention, inline=True)
-            embed.set_footer(text="KRISHU X - Admin Toolbox")
+            embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
             await send_response(embed=embed)
         except Exception as e:
@@ -435,7 +435,7 @@ class AdminToolbox(commands.Cog):
         embed.add_field(name="🎭 Top Role", value=member.top_role.mention, inline=True)
         embed.add_field(name="🟢 Status", value=str(member.status).title(), inline=True)
         embed.add_field(name="👑 Bot", value="✅ Yes" if member.bot else "❌ No", inline=True)
-        embed.set_footer(text="KRISHU X - Admin Toolbox")
+        embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
         await send_response(embed=embed)
 
@@ -463,7 +463,7 @@ class AdminToolbox(commands.Cog):
         embed.add_field(name="🔗 Mentionable", value="✅ Yes" if role.mentionable else "❌ No", inline=True)
         embed.add_field(name="🔒 Hoist", value="✅ Yes" if role.hoist else "❌ No", inline=True)
         embed.add_field(name="📅 Created", value=role.created_at.strftime("%d-%m-%Y %H:%M"), inline=True)
-        embed.set_footer(text="KRISHU X - Admin Toolbox")
+        embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
 
         await send_response(embed=embed)
 
@@ -485,7 +485,7 @@ class AdminToolbox(commands.Cog):
             color=discord.Color.green(),
             timestamp=datetime.now()
         )
-        embed.set_footer(text="KRISHU X - Admin Toolbox")
+        embed.set_footer(text="4FLAG SECURITY - Admin Toolbox")
         await send_response(embed=embed)
 
     @app_commands.command(name="helpadmin", description="Show admin commands help")
@@ -500,7 +500,7 @@ class AdminToolbox(commands.Cog):
         send_response = ctx_or_interaction.response.send_message if is_slash else ctx_or_interaction.send
 
         embed = discord.Embed(
-            title="🛡️ KRISHU X - ADMIN TOOLBOX",
+            title="🛡️ 4FLAG SECURITY",
             description="Complete server management bot",
             color=discord.Color.blue(),
             timestamp=datetime.now()
@@ -574,7 +574,7 @@ class AdminToolbox(commands.Cog):
             inline=False
         )
 
-        embed.set_footer(text="Made with ❤️ by Krishu X Cheats")
+        embed.set_footer(text="Made with ❤️ by 4FLAG SECURITY")
         await send_response(embed=embed)
 
 # =========================================================
@@ -600,7 +600,7 @@ class KrishuXBot(commands.Bot):
             # =====================================================
             # ⚠️ HNA 7ET L'ID DYAL SERVER DYALEK (4FLAG CHEATS) ⚠️
             # =====================================================
-            YOUR_GUILD_ID = 1422055422864396389  # <-- Bdel had l'raqm
+            YOUR_GUILD_ID = 1422055422864396389  # <-- ID dyal l'server dyalek
             
             guild = discord.Object(id=YOUR_GUILD_ID)
             self.tree.copy_global_to(guild=guild)
@@ -622,7 +622,7 @@ class KrishuXBot(commands.Bot):
         bot_name = f"{self.user.name}"
 
         print("\n" + "=" * 60)
-        print("🛡️ KRISHU X - ADMIN TOOLBOX")
+        print("🛡️ 4FLAG SECURITY - ADMIN TOOLBOX")
         print("=" * 60)
         print(f"✅ Bot: {bot_name}")
         print(f"📊 Servers: {server_count}")
